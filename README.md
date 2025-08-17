@@ -1,4 +1,4 @@
-# MaterialBank & TextureBank Generator for Baldur’s Gate 3
+# MaterialBank&TextureBank Generator for Baldur’s Gate 3
 
 MaterialBank & TextureBank Generator is a Scala-based tool designed to automate the creation and regeneration of MaterialBank and TextureBank files for Baldur’s Gate 3 mods. The tool leverages existing MaterialBank and TextureBank files along with texture files to streamline the modding process.
 
