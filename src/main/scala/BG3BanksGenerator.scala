@@ -10,13 +10,14 @@ import scala.xml.PrettyPrinter
 
 object BG3BanksGenerator
   extends App {
-  /** enter mod's root folder here */
-  val modSources: String = """G:\BG3 Modding\bg3-modders-multitool\UnpackedMods\OBSC_Muse"""
+  /** enter mod's root folder here
+   * for example """G:\BG3 Modding\bg3-modders-multitool\UnpackedMods\WBLT_Example""" */
+  val modSources: String = """"""
   /** enter output subpathes if needed. leave empty for default
    * textures: Public\{Mod name}\Content\Assets\Characters\[PAK]_Armor\textures.lsx
    * materials: Public\{Mod name}\Content\Assets\Characters\[PAK]_Armor\materials.lsx */
-  val textureBankOutput: String = """Public\OBSC_Muse\Content\Assets\Characters\[PAK]_Armor\materials.lsx"""
-  val materialBankOutput: String = """Public\OBSC_Muse\Content\Assets\Characters\[PAK]_Armor\materials.lsx"""
+  val textureBankOutput: String = """"""
+  val materialBankOutput: String = """"""
   /** that's all folks */
   val modSourcesPath: Path = Paths.get(modSources)
   val modname: String = modSourcesPath.getParent.relativize(modSourcesPath).toString
