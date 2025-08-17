@@ -4,8 +4,11 @@ MaterialBank & TextureBank Generator is a Scala-based tool designed to automate 
 
 ## Key Features
 Automated Generation: Automatically creates new MaterialBank and TextureBank files
+
 Regeneration Support: Easily regenerates existing files with updated textures
+
 File Compatibility: Works with both existing MaterialBank/TextureBank files and raw texture files
+
 Modding Optimization: Simplifies the process of updating mod assets
 
 ## Installation
@@ -16,11 +19,16 @@ Modding Optimization: Simplifies the process of updating mod assets
 
 ## Prerequisites:
 Scala runtime environment
+
 Java Development Kit (JDK) version 11 or higher
+
 Baldur’s Gate 3 game files
+
 Modding Tools: Basic understanding of BG3 modding
 
 ## To be implemented:
 Out of project configuration
+
 CLI interface
+
 VisualBank Support
