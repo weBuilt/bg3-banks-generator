@@ -90,7 +90,6 @@ object DDSParser {
   def parseTextures(files: List[Path], modSources: Path): List[Texture] =
     files.flatMap { file =>
       val name = file.getFileName.toString.split("\\.").dropRight(1).mkString(".")
-      println(name)
       texture(name, file, modSources, Map.empty)
       // looks like width and height do nothing. speed up by using default values
       //      attributes.get("Name").map(name => name.split("\\.").dropRight(1).mkString(".")).flatMap(texture(_, file, modSources, attributes))
