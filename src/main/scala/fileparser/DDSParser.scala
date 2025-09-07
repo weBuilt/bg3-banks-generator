@@ -1,33 +1,13 @@
 package fileparser
 
+import domain.BankElement.Generated
 import domain.Texture
 
-import java.nio.file.{Path, Paths}
-import scala.sys.process._
-import scala.util.matching.Regex
+import java.nio.file.Path
 
 object DDSParser {
-  val powershellScriptPath: String = Paths.get("src/main/powershell/get-filemetadata.ps1").toAbsolutePath.toString
-  val kv: Regex = """([^:]*):(.*)""".r
-
-  //todo run in 1 ps session ?
-  def getAttributes(file: Path): Map[String, String] = {
-    val cmd = s"""powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& { . '$powershellScriptPath'; Get-FileMetaData '${file.toAbsolutePath.toString}'}" """
-    val res = cmd.lazyLines.toList
-    res.collect {
-      case kv(k, v) =>
-        (k.trim, v.trim)
-    }.toMap
-  }
-
-  case class MaterialNameWithTextureType(name: String, tpe: String)
-
-  case class SpecificValues(
-    format: String,
-    srgb: String,
-    tpe: String,
-  )
-
+//  val powershellScriptPath: String = Paths.get("src/main/powershell/get-filemetadata.ps1").toAbsolutePath.toString
+//  val kv: Regex = """([^:]*):(.*)""".r
   val specificValuesMap: Map[String, SpecificValues] = Map(
     "MSK" -> SpecificValues("62", "False", "MSK"),
     "BM" -> SpecificValues("62", "True", "BM"),
@@ -51,6 +31,55 @@ object DDSParser {
       suffixes.map(_ -> tpe)
   }
 
+  //todo run in 1 ps session ?
+/*  def getAttributes(file: Path): Map[String, String] = {
+    val cmd = s"""powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& { . '$powershellScriptPath'; Get-FileMetaData '${file.toAbsolutePath.toString}'}" """
+    val res = cmd.lazyLines.toList
+    res.collect {
+      case kv(k, v) =>
+        (k.trim, v.trim)
+    }.toMap
+  }*/
+
+  def parseTextures(files: List[Path], modSources: Path): List[Texture] =
+    files.map { file =>
+      val name = file.getFileName.toString.split("\\.").dropRight(1).mkString(".")
+      texture(name, file, modSources, Map.empty)
+      // looks like width and height do nothing. speed up by using default values
+      //      attributes.get("Name").map(name => name.split("\\.").dropRight(1).mkString(".")).flatMap(texture(_, file, modSources, attributes))
+    }
+
+  def texture(
+    name: String,
+    file: Path,
+    modSources: Path,
+    attrs: Map[String, String],
+  ): Texture = {
+    val txtre = Texture(
+      name = name,
+      source = Generated,
+      sourceFile = modSources.relativize(file).toString,
+      format = "62",
+      width = attrs.getOrElse("Width", "2048").filter(_.isDigit),
+      height = attrs.getOrElse("Width", "2048").filter(_.isDigit),
+      template = name,
+    )
+    specificValues(name) match {
+      case Some((materialName, value)) =>
+      txtre.copy(
+        format = value.format,
+        srgb = value.srgb,
+        tpe = value.tpe,
+        materialName = Some(materialName)
+      )
+      case _ =>
+        txtre
+    }
+  }
+
+  def specificValues(name: String): Option[(String, SpecificValues)] =
+    processName(name).flatMap(t => specificValuesMap.get(t.tpe).map(t.name -> _))
+
   def processName(name: String): Option[MaterialNameWithTextureType] = {
     val lcName = name.toLowerCase
     typeBySuffix.collectFirst {
@@ -59,39 +88,11 @@ object DDSParser {
     }
   }
 
-  def specificValues(name: String): Option[(String, SpecificValues)] =
-    processName(name).flatMap(t => specificValuesMap.get(t.tpe).map(t.name -> _))
+  case class MaterialNameWithTextureType(name: String, tpe: String)
 
-  def texture(
-    name: String,
-    file: Path,
-    modSources: Path,
-    attrs: Map[String, String],
-  ): Option[Texture] = {
-    val txtre = Texture(
-      name = name,
-      sourceFile = modSources.relativize(file).toString,
-      format = "62",
-      width = attrs.getOrElse("Width", "2048").filter(_.isDigit),
-      height = attrs.getOrElse("Width", "2048").filter(_.isDigit),
-      template = name,
-      fromFile = true,
-    )
-    specificValues(name).map { case (materialName, value) =>
-      txtre.copy(
-        format = value.format,
-        srgb = value.srgb,
-        tpe = value.tpe,
-        materialName = materialName
-      )
-    }
-  }
-
-  def parseTextures(files: List[Path], modSources: Path): List[Texture] =
-    files.flatMap { file =>
-      val name = file.getFileName.toString.split("\\.").dropRight(1).mkString(".")
-      texture(name, file, modSources, Map.empty)
-      // looks like width and height do nothing. speed up by using default values
-      //      attributes.get("Name").map(name => name.split("\\.").dropRight(1).mkString(".")).flatMap(texture(_, file, modSources, attributes))
-    }.filter(_.tpe.nonEmpty)
+  case class SpecificValues(
+    format: String,
+    srgb: String,
+    tpe: String,
+  )
 }

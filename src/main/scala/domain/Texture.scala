@@ -1,9 +1,10 @@
 package domain
 
-import scala.xml.{Comment, NodeSeq}
+import scala.xml.NodeSeq
 
 case class Texture(
   name: String,
+  source: BankElement.BankElementSource,
   id: String = "",
   sourceFile: String = "",
   format: String = "",
@@ -15,12 +16,11 @@ case class Texture(
   streaming: String = "True",
   template: String = "",
   tpe: String = "",
-  materialName: String = "",
-  fromFile: Boolean = false,
-  hasLsx: Boolean = false,
-) extends BankElement {
-  val comment: Comment = Comment(s"$materialName $tpe $id")
-  val xml: NodeSeq =
+  materialName: Option[String] = None,
+) extends BankElementWithComment {
+  val bankName: String = Texture.bankName
+
+  val xmlBase: NodeSeq =
     <node id="Resource">
       <attribute id="Name" type="LSString" value={name}/>
       <attribute id="ID" type="FixedString" value={id}/>
@@ -34,5 +34,8 @@ case class Texture(
       <attribute id="Template" type="FixedString" value={template}/>
       <attribute id="Type" type="int32" value="1"/>
     </node>
-  val xmlRepr: NodeSeq = comment ++ xml
+}
+
+object Texture {
+  val bankName: String = "TextureBank"
 }

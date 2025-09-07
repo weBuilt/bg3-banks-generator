@@ -1,7 +1,19 @@
 package domain
 
-import scala.xml.NodeSeq
+import domain.BankElement.BankElementSource
 
-trait BankElement {
-  def xmlRepr: NodeSeq
+import java.nio.file.Path
+
+trait BankElement extends XmlRepresentation {
+  def bankName: String
+
+  def source: BankElementSource
+}
+
+object BankElement {
+  sealed trait BankElementSource
+
+  case class Existing(bankFile: Path) extends BankElementSource
+
+  case object Generated extends BankElementSource
 }

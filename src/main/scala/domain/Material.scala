@@ -1,19 +1,20 @@
 package domain
 
-import scala.xml.{Comment, NodeSeq}
+import scala.xml.NodeSeq
 
 case class Material(
   name: String,
+  source: BankElement.BankElementSource,
   id: String = "",
   materialType: String = "4",
   sourceFile: String = "Public/Shared/Assets/Materials/Characters/CHAR_BASE_AlphaTest_2S.lsf",
   originalFileVersion: String = "144115207403209030",
   textures: Seq[TextureUsage] = Nil,
   extraChildren: NodeSeq = Material.defaultExtra,
-) extends BankElement {
-  val comment: Comment = Comment(s"$name $id")
+) extends BankElementWithComment {
+  val bankName: String = Material.bankName
 
-  val xml: NodeSeq =
+  val xmlBase: NodeSeq =
     <node id="Resource">
       <attribute id="DiffusionProfileUUID" type="FixedString" value=""/>
       <attribute id="ID" type="FixedString" value={id}/>
@@ -22,14 +23,13 @@ case class Material(
       <attribute id="SourceFile" type="LSString" value={sourceFile}/>
       <attribute id="_OriginalFileVersion_" type="int64" value={originalFileVersion}/>
       <children>
-        {extraChildren}{textures.map(_.xmlRepr)}{Material.magicalTexture}
+        {extraChildren}{textures.map(_.xml)}{Material.magicalTexture}
       </children>
     </node>
-
-  val xmlRepr: NodeSeq = comment ++ xml
 }
 
 object Material {
+  val bankName: String = "MaterialBank"
   val magicalTexture: NodeSeq = <node id="Texture2DParameters">
     <attribute id="Enabled" type="bool" value="False"/>
     <attribute id="ExportAsPreset" type="bool" value="True"/>

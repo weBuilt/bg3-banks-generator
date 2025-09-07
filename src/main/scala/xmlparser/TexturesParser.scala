@@ -6,14 +6,15 @@ import fileparser.DDSParser
 import scala.xml.{Node, NodeSeq}
 
 object TexturesParser extends LSXParser {
-  val bankName: String = "TextureBank"
+  val bankName: String = Texture.bankName
   val nodeId: String = "Resource"
 
-  override def parse(node: Node): BankElement = {
+  override def parse(node: Node, source: BankElement.BankElementSource): BankElement = {
     val attributes: NodeSeq = node \ "attribute"
     val processedName = DDSParser.processName(attr(attributes, "Name"))
     Texture(
       name = attr(attributes, "Name"),
+      source = source,
       id = attr(attributes, "ID"),
       sourceFile = attr(attributes, "SourceFile"),
       format = attr(attributes, "Format"),
@@ -25,8 +26,7 @@ object TexturesParser extends LSXParser {
       streaming = attr(attributes, "Streaming"),
       template = attr(attributes, "Template"),
       tpe = processedName.map(_.tpe).getOrElse(""),
-      materialName = processedName.map(_.name).getOrElse(""),
-      hasLsx = true,
+      materialName = processedName.map(_.name),
     )
   }
 }
