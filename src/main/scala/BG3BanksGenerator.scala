@@ -1,7 +1,6 @@
 import domain.BankElement.{Existing, Generated}
 import domain._
 import fileparser.DDSParser
-import fileparser.granny.GR2Parser
 import xmlparser.LSXParser
 
 import java.io.File
@@ -9,7 +8,6 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Path, Paths}
 import scala.annotation.tailrec
 import scala.util.Try
-import scala.util.matching.Regex
 
 object BG3BanksGenerator
   extends App {
@@ -29,7 +27,7 @@ object BG3BanksGenerator
   val modSourcesPath: Path = Paths.get(modSources).normalize()
   val modname: String = modSourcesPath.getParent.relativize(modSourcesPath).toString
   val assetsPath: Path = modSourcesPath.resolve(Paths.get("Generated", "Public", modname))
-  val allLsxPath: Path = modSourcesPath.resolve(Paths.get("Public", modname, "Content"))
+  val allLsxPath: Path = modSourcesPath.resolve(Paths.get("Public", modname, "Content", "Assets"))
   val defaultLsxPath: Path = Paths.get("Public", modname, "Content", "Assets", "Characters", "[PAK]_Armor")
   //check and prepare output paths
 
@@ -85,7 +83,7 @@ object BG3BanksGenerator
   val existingElementsMap: Map[String, List[BankElement]] = existingBankElements.groupBy(_.bankName)
 
   val ddsAssets: List[Path] = recursiveGetFile(_.getName.toLowerCase.endsWith(".dds"), Nil, assetsPath.toFile :: Nil)
-  val gr2Assets: List[Path] = recursiveGetFile(_.getName.toLowerCase.endsWith(".gr2"), Nil, assetsPath.toFile :: Nil)
+//  val gr2Assets: List[Path] = recursiveGetFile(_.getName.toLowerCase.endsWith(".gr2"), Nil, assetsPath.toFile :: Nil)
 
   val texturesFromFiles: List[Texture] = DDSParser.parseTextures(ddsAssets, modSourcesPath)
 
@@ -106,7 +104,7 @@ object BG3BanksGenerator
       ).toRight(element)
     }
     val old = existingElements.filterNot(t => updates.exists(equals(t)))
-    nnew.map(setId(java.util.UUID.randomUUID.toString)) :::
+    nnew.map(elem => setId(java.util.UUID.randomUUID.toString)(elem)) :::
       upd.flatMap { case (u, o) => o.map(update(u, _)) } :::
       old
   }
@@ -145,7 +143,7 @@ object BG3BanksGenerator
   ).sortBy(_.name)
     .map(_.copy(source = Existing(materialBankPath)))
 
-  val visualsFromFiles = gr2Assets
+  val visualsFromFiles: List[Visual] = Nil/* gr2Assets
     .map { path => path -> GR2Parser.parse(path, modSourcesPath) }
     .foldLeft(List.empty[Visual]) {
       case (acc, (path, Left(error))) =>
@@ -155,6 +153,7 @@ object BG3BanksGenerator
         println(s"success: ${path.getFileName} has ${value.meshes.size} meshes")
         value :: acc
     }
+    */
   val allVisuals = concatOldWithNew[Visual](
     bankName = Visual.bankName,
     updates = visualsFromFiles,
