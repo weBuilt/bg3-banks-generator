@@ -1,5 +1,7 @@
 package domain
 
+import util.PackedVersion
+
 import scala.xml.NodeSeq
 
 case class Visual(
@@ -25,8 +27,8 @@ case class Visual(
   skeletonSlot: String = "",
   slot: String = "Body",
   softbodyResourceID: String = "",
-  supportsVertexColorMask: String = "False",
-  originalFileVersion: String = "144115207403209035",
+  supportsVertexColorMask: String = "True",
+  originalFileVersion: String = PackedVersion.defaultVersion.string64,
   extraChildren: NodeSeq = Visual.defaultExtra,
 ) extends BankElementWithComment {
   val bankName: String = Visual.bankName

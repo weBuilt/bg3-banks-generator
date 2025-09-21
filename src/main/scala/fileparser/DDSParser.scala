@@ -2,6 +2,7 @@ package fileparser
 
 import domain.BankElement.Generated
 import domain.Texture
+import util.FileUtils
 
 import java.nio.file.Path
 
@@ -58,7 +59,7 @@ object DDSParser {
     val txtre = Texture(
       name = name,
       source = Generated,
-      sourceFile = modSources.relativize(file).toString,
+      sourceFile = FileUtils.forwardslash(modSources.relativize(file)),
       format = "62",
       width = attrs.getOrElse("Width", "2048").filter(_.isDigit),
       height = attrs.getOrElse("Width", "2048").filter(_.isDigit),

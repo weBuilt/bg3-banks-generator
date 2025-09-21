@@ -14,12 +14,14 @@ object VisualsParser extends LSXParser {
   ): BankElement = {
     val attributes: NodeSeq = node \ "attribute"
     val (objects, extraChildren) = (node \ "children" \ "node").partition(_.\@("id") == "Objects")
-    val meshes = objects.map { obj =>
+    val meshes = objects.zipWithIndex.map {
+      case (obj, idx) =>
       val attributes: NodeSeq = obj \ "attribute"
       Mesh(
         objectId = attr(attributes, "ObjectID"),
         materialId = attr(attributes, "MaterialID"),
         lod = attr(attributes, "LOD"),
+        order = Some(idx),
       )
     }.toList
     Visual(

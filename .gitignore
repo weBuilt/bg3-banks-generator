@@ -2,6 +2,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+deploy/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -51,3 +52,8 @@ project/build.properties
 project/metals.sbt
 project/.bloop/
 project/project/metals.sbt
+
+### CSharp ###
+src/main/csharp/bin
+src/main/csharp/obj
+src/main/csharp/*.sln

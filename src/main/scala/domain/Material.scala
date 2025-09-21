@@ -1,5 +1,7 @@
 package domain
 
+import util.PackedVersion
+
 import scala.xml.NodeSeq
 
 case class Material(
@@ -8,7 +10,7 @@ case class Material(
   id: String = "",
   materialType: String = "4",
   sourceFile: String = "Public/Shared/Assets/Materials/Characters/CHAR_BASE_AlphaTest_2S.lsf",
-  originalFileVersion: String = "144115207403209030",
+  originalFileVersion: String = PackedVersion.defaultVersion.string64,
   textures: Seq[TextureUsage] = Nil,
   extraChildren: NodeSeq = Material.defaultExtra,
 ) extends BankElementWithComment {

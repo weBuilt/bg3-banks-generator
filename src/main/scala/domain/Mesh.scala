@@ -6,6 +6,7 @@ case class Mesh(
   objectId: String,
   materialId: String,
   lod: String,
+  order: Option[Int],
 ) extends XmlRepresentation {
   def xml: NodeSeq =
     <node id="Objects">
