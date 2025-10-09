@@ -1,7 +1,6 @@
-package xmlparser
+package lsx
 
-import domain.BankElement
-import domain.BankElement.{BankElementSource, Existing}
+import BankElement.{BankElementSource, Existing}
 
 import java.nio.file.{Files, Path}
 import scala.util.Try

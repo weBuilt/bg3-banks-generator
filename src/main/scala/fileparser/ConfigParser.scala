@@ -20,6 +20,7 @@ object ConfigParser {
   val materials: CLIOption = CLIOption.builder("m").longOpt("materials").hasArg(true).desc("Relative path to output MaterialBank").get()
   val visuals: CLIOption = CLIOption.builder("v").longOpt("visuals").hasArg(true).desc("Relative path to output VisualBank").get()
 //  val initialize: CLIOption = CLIOption.builder("i").longOpt("initialize").hasArg(false).desc("Flag to initialize new mod and directories structure inside sources directory").get()
+  val ui: CLIOption = CLIOption.builder("ui").longOpt("ui").hasArg(false).desc("Flag to launch UI app. If cfg file is specified - new or existing project will be opened").get()
 
   val options: Options = new Options()
     .addOption(conf)
@@ -30,6 +31,7 @@ object ConfigParser {
     .addOption(textures)
     .addOption(materials)
     .addOption(visuals)
+    .addOption(ui)
 //    .addOption(initialize)
   val parser: CommandLineParser = new DefaultParser()
 
@@ -46,6 +48,7 @@ object ConfigParser {
     textures: Option[String] = None,
     materials: Option[String] = None,
     visuals: Option[String] = None,
+    ui: Boolean = false,
 //    initialize: Boolean = false,
   ) {
     def requiredConfig: Option[RequiredConfig] = for {
@@ -88,6 +91,7 @@ object ConfigParser {
       textures = getValue(textures).orElse(initialConfig.textures),
       materials = getValue(materials).orElse(initialConfig.materials),
       visuals = getValue(visuals).orElse(initialConfig.visuals),
+      ui = cmd.hasOption(ui),
 //      initialize = cmd.hasOption(initialize) || initialConfig.initialize, //??
     )
   }

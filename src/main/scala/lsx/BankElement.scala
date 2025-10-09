@@ -1,6 +1,6 @@
-package domain
+package lsx
 
-import domain.BankElement.BankElementSource
+import lsx.BankElement.BankElementSource
 
 import java.nio.file.Path
 

@@ -1,8 +1,10 @@
-import domain.BankElement.{Existing, Generated}
-import domain._
+package app
+
+import lsx.BankElement.{Existing, Generated}
 import fileparser.ConfigParser.RequiredConfig
 import fileparser.{ConfigParser, DDSParser, GR2Parser}
-import xmlparser.LSXParser
+import ui.UIApp
+import lsx.{BankElement, LSXParser, Material, Texture, TextureUsage, Visual}
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -13,12 +15,15 @@ import scala.util.Try
 object BG3BanksGenerator
   extends App {
   val config: ConfigParser.Config = ConfigParser.parse(args)
-  config.requiredConfig match {
+  if (config.ui) {
+    println("launching in UI mode")
+    UIApp.main(args)
+  }  else config.requiredConfig match {
     case None =>
       println(ConfigParser.helpMessage)
     case Some(RequiredConfig(modname, modSources)) =>
-
       val modSourcesPath: Path = Paths.get(modSources).normalize()
+      println(s"processing $modname in $modSourcesPath")
       val assetsPath: Path = modSourcesPath.resolve(Paths.get("Generated", "Public", modname))
       val allLsxRelativePath: Path = Paths.get("Public", modname, "Content", "Assets")
       val allLsxPath: Path = modSourcesPath.resolve(allLsxRelativePath)

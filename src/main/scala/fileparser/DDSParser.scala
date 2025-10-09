@@ -1,8 +1,8 @@
 package fileparser
 
-import domain.BankElement.Generated
-import domain.Texture
+import lsx.BankElement.Generated
 import util.FileUtils
+import lsx.Texture
 
 import java.nio.file.Path
 

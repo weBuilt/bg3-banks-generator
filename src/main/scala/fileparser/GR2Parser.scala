@@ -1,8 +1,8 @@
 package fileparser
 
-import domain.BankElement.Generated
-import domain.{Mesh, Visual}
+import lsx.BankElement.Generated
 import util.{FileUtils, UUID}
+import lsx.{Mesh, Visual}
 
 import java.nio.file.{Path, Paths}
 import scala.sys.process._

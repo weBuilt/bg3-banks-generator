@@ -1,6 +1,5 @@
-package xmlparser
+package lsx
 
-import domain.{BankElement, Texture}
 import fileparser.DDSParser
 
 import scala.xml.{Node, NodeSeq}

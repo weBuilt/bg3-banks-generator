@@ -1,4 +1,4 @@
-package domain
+package lsx
 
 import util.PackedVersion
 
