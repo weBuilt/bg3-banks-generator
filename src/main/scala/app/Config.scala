@@ -17,13 +17,14 @@ object Config {
   )
 
   case class AppConfiguration(
-    lastProject: Reference,
-    recent: List[Reference],
+    lastProject: ProjectReference,
+    recent: List[ProjectReference],
   )
 
-  case class Reference(
+  case class ProjectReference(
     id: String,
     name: String,
+    sources: String,
   )
 
 }

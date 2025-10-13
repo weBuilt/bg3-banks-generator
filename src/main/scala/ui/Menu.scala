@@ -1,6 +1,7 @@
 package ui
 
 import app.State
+import app.controls.ProjectControls
 import fileparser.lsx.Meta
 import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.control.{Alert, ButtonType, MenuBar, MenuItem, Menu => FXMenu}
@@ -36,19 +37,6 @@ object Menu {
         accelerator = new KeyCodeCombination(KeyCode.N, KeyCombination.ControlDown, KeyCombination.ShiftDown)
         onAction = _ => {
           println("open")
-
-          def openNew = {
-            val directoryChooser = new DirectoryChooser
-            val sources = directoryChooser.showDialog(UIApp.primaryStage)
-            val meta = Meta.find(sources)
-            meta match {
-              case Left(value) => println(value.message)
-              case Right(value) =>
-                State.meta.update(value)
-                State.sources.update(sources.toString)
-            }
-          }
-
           if (State.meta.isNotNull.get) {
             val alert = new Alert(AlertType.Confirmation) {
               contentText = "Save current project?"
@@ -63,14 +51,14 @@ object Menu {
             alert.showAndWait() match {
               case Some(ButtonType.Yes) =>
                 println("save current")
-                openNew
+                openProject()
               case Some(ButtonType.No) =>
                 println("discard current")
-                openNew
+                openProject()
               case _ =>
                 println("cancel")
             }
-          } else openNew
+          } else openProject()
         }
       }
       val save = new MenuItem {
@@ -88,5 +76,10 @@ object Menu {
         recent ::
         Nil
     }
+  }
+  def openProject(): Unit = {
+    val directoryChooser = new DirectoryChooser
+    val sources = directoryChooser.showDialog(UIApp.primaryStage)
+    ProjectControls.openProject(sources)
   }
 }
