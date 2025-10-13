@@ -1,6 +1,6 @@
-package lsx
+package fileparser.lsx
 
-import lsx.BankElement.BankElementSource
+import BankElement.BankElementSource
 
 import java.nio.file.Path
 

@@ -1,4 +1,4 @@
-package lsx
+package fileparser.lsx
 
 import scala.xml.{Comment, NodeSeq}
 

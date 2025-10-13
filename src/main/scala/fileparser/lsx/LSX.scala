@@ -1,4 +1,4 @@
-package lsx
+package fileparser.lsx
 
 import domain.Exceptions
 import domain.Exceptions.MyException

@@ -5,6 +5,7 @@ import scalafx.scene.control.Separator
 import scalafx.scene.layout.HBox
 import scalafx.scene.text.Text
 import app.State
+import fileparser.lsx.Meta
 
 object StatusBar {
   lazy val statusBar: HBox = {
@@ -42,7 +43,7 @@ object StatusBar {
     }
     hbox
   }
-  def metaStringLens(f: lsx.Meta => String): StringBinding = Bindings.createStringBinding(
+  def metaStringLens(f: Meta => String): StringBinding = Bindings.createStringBinding(
     () => Option(app.State.meta.value).map(f).getOrElse(""),
     State.meta,
   )

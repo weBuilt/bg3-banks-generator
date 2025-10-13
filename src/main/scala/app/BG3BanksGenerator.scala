@@ -1,10 +1,10 @@
 package app
 
-import lsx.BankElement.{Existing, Generated}
+import fileparser.lsx.BankElement.{Existing, Generated}
 import fileparser.ConfigParser.RequiredConfig
+import fileparser.lsx.{BankElement, LSXParser, Material, Texture, TextureUsage, Visual}
 import fileparser.{ConfigParser, DDSParser, GR2Parser}
 import ui.UIApp
-import lsx.{BankElement, LSXParser, Material, Texture, TextureUsage, Visual}
 
 import java.io.File
 import java.nio.charset.StandardCharsets

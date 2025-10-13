@@ -1,4 +1,4 @@
-package lsx
+package fileparser.lsx
 
 import BankElement.{BankElementSource, Existing}
 

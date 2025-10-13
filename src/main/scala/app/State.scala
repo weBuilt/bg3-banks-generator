@@ -1,6 +1,6 @@
 package app
 
-import lsx.Meta
+import fileparser.lsx.Meta
 import scalafx.beans.property.{ObjectProperty, StringProperty}
 
 object State {

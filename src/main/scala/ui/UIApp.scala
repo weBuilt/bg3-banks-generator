@@ -1,6 +1,7 @@
 package ui
 
 import app.Config
+import app.Config.WindowConfiguration
 import io.circe.generic.extras.Configuration
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -35,21 +36,14 @@ object UIApp extends JFXApp3 {
     }
   }
 
-  case class WindowState(
-    x: Double = 0d,
-    y: Double = 0d,
-    width: Double = 800d,
-    height: Double = 600d,
-    screen: Int = 0,
-    maximized: Boolean = false,
-  )
+
 
   def saveWindowState(stage: Stage): Unit = {
     Files.createDirectories(Config.configDirectory)
     if (Files.notExists(Config.windowConfig)) Files.createFile(Config.windowConfig)
     val currentScreen = getScreenNumberByPosition(stage)
 
-    val windowState = WindowState(
+    val windowState = WindowConfiguration(
       x = stage.getX,
       y = stage.getY,
       width = stage.getWidth,
@@ -59,10 +53,10 @@ object UIApp extends JFXApp3 {
     Files.write(Config.windowConfig, windowState.asJson.spaces2.getBytes)
   }
 
-  def loadWindowState(): WindowState =
+  def loadWindowState(): WindowConfiguration =
     if (app.Config.configDirectory.toFile.exists()) {
-      decode[WindowState](Files.readString(Config.windowConfig)).toOption.getOrElse(WindowState())
-    } else WindowState()
+      decode[WindowConfiguration](Files.readString(Config.windowConfig)).toOption.getOrElse(WindowConfiguration())
+    } else WindowConfiguration()
 
 
   def getScreenByNumber(screenNumber: Int): Screen = {
@@ -89,7 +83,7 @@ object UIApp extends JFXApp3 {
     }.getOrElse(0)
   }
   def adjustWindowPosition(
-    settings: WindowState,
+    settings: WindowConfiguration,
     screen: Screen,
   ): (Double, Double, Double, Double) = {
     val visualBounds = screen.getVisualBounds

@@ -1,10 +1,10 @@
 package ui
 
 import app.State
+import fileparser.lsx.Meta
 import scalafx.scene.control.{Menu => FXMenu, MenuBar, MenuItem}
 import scalafx.scene.input.{KeyCode, KeyCodeCombination, KeyCombination}
 import scalafx.stage.{DirectoryChooser, FileChooser}
-import lsx.Meta
 
 object Menu {
   /**

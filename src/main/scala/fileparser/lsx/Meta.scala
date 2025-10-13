@@ -1,4 +1,4 @@
-package lsx
+package fileparser.lsx
 
 import cats.implicits._
 import domain.Exceptions
@@ -10,6 +10,7 @@ import java.io.File
 case class Meta(
   author: String,
   name: String,
+  uuid: String,
   folder: String,
   version: PackedVersion,
   lsx: LSX.Save,
@@ -68,11 +69,12 @@ object Meta {
             moduleInfo <- node.children.find(_.name == "ModuleInfo")
             author <- moduleInfo.attr("Author")
             name <- moduleInfo.attr("Name")
+            uuid <- moduleInfo.attr("UUID")
             folder <- moduleInfo.attr("Folder")
             version <- moduleInfo.attr("Version64")
             versionLong <- version.value.toLongOption
             packedVersion = PackedVersion.fromInt64(versionLong)
-          } yield Meta(author.value, name.value, folder.value, packedVersion, lsx)
+          } yield Meta(author.value, name.value, uuid.value, folder.value, packedVersion, lsx)
           meta.toRight[MyException](LSX.malformedXMLException)
         case _ =>
           LSX.malformedXMLException.asLeft[Meta]
