@@ -2,6 +2,7 @@ package ui
 
 import app.Config
 import app.Config.WindowConfiguration
+import app.controls.ProjectControls
 import io.circe.generic.extras.Configuration
 import io.circe.generic.auto._
 import io.circe.parser.decode
@@ -17,6 +18,7 @@ object UIApp extends JFXApp3 {
   implicit val customConfig: Configuration = Configuration.default.withDefaults
 
   def start(): Unit = {
+    initState()
     val savedState = loadWindowState()
     val screen = getScreenByNumber(savedState.screen)
     val (x, y, width, height) = adjustWindowPosition(savedState, screen)
@@ -107,5 +109,8 @@ object UIApp extends JFXApp3 {
     }
 
     (x, y, adjustedWidth, adjustedHeight)
+  }
+  def initState(): Unit = {
+    ProjectControls.init()
   }
 }

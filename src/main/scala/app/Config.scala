@@ -1,6 +1,6 @@
 package app
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.{Files, Path, Paths}
 
 object Config {
   val configDirectory: Path = Paths.get(System.getProperty("user.home")).resolve(".wblt_bg3bg")
@@ -17,7 +17,7 @@ object Config {
   )
 
   case class AppConfiguration(
-    lastProject: ProjectReference,
+    lastProject: Option[ProjectReference],
     recent: List[ProjectReference],
   )
 
@@ -26,5 +26,14 @@ object Config {
     name: String,
     sources: String,
   )
+
+  def currentReference(): Option[ProjectReference] =
+    Option.when(State.meta.isNotNull.get()) {
+      ProjectReference(
+        State.meta.value.uuid,
+        State.meta.value.name,
+        State.sources.value,
+      )
+    }
 
 }

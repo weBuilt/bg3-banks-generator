@@ -1,6 +1,6 @@
 package ui
 
-import app.State
+import app.{Config, State}
 import app.controls.ProjectControls
 import fileparser.lsx.Meta
 import scalafx.scene.control.Alert.AlertType
@@ -80,6 +80,9 @@ object Menu {
   def openProject(): Unit = {
     val directoryChooser = new DirectoryChooser
     val sources = directoryChooser.showDialog(UIApp.primaryStage)
+    rememberCurrent()
     ProjectControls.openProject(sources)
   }
+  def rememberCurrent(): Unit =
+    Config.currentReference().foreach(ProjectControls.addToRecent)
 }
