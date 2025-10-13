@@ -6,6 +6,7 @@ import domain.Exceptions.MyException
 import util.PackedVersion
 
 import java.io.File
+import java.nio.file.Files
 
 case class Meta(
   author: String,
@@ -26,7 +27,7 @@ object Meta {
   /** look for meta.lsx in sources/Mods/_/ */
   def find(sources: File): Either[MyException, Meta] =
     for {
-      sources <- Either.cond(sources.isDirectory, sources, Exceptions.noDir)
+      sources <- Either.cond(sources.exists() && sources.isDirectory, sources, Exceptions.noDir)
       modsDir <- findModsDir(sources)
       metaFiles <- findMetaFiles(modsDir)
       meta <- validateAndParseMeta(metaFiles)

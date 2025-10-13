@@ -78,7 +78,9 @@ object Menu {
     }
   }
   def openProject(): Unit = {
-    val directoryChooser = new DirectoryChooser
+    val directoryChooser = new DirectoryChooser {
+      initialDirectory <== State.sourcesParent
+    }
     val sources = directoryChooser.showDialog(UIApp.primaryStage)
     rememberCurrent()
     ProjectControls.openProject(sources)
