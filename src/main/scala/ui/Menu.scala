@@ -31,11 +31,11 @@ object Menu {
           println("new")
         }
       }
-      val fromExisting = new MenuItem {
-        text = "New From Existing Sources"
+      val open = new MenuItem {
+        text = "Open"
         accelerator = new KeyCodeCombination(KeyCode.N, KeyCombination.ControlDown, KeyCombination.ShiftDown)
         onAction = _ => {
-          println("existing")
+          println("open")
 
           def openNew = {
             val directoryChooser = new DirectoryChooser
@@ -73,11 +73,6 @@ object Menu {
           } else openNew
         }
       }
-      val open = new MenuItem {
-        text = "Open"
-        accelerator = new KeyCodeCombination(KeyCode.O, KeyCombination.ControlDown)
-        onAction = _ => println("open")
-      }
       val save = new MenuItem {
         text = "New"
         accelerator = new KeyCodeCombination(KeyCode.S, KeyCombination.ControlDown)
@@ -88,7 +83,6 @@ object Menu {
         items = Nil
       }
       nw ::
-        fromExisting ::
         open ::
         save ::
         recent ::
