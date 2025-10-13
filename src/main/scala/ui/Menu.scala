@@ -2,9 +2,10 @@ package ui
 
 import app.State
 import fileparser.lsx.Meta
-import scalafx.scene.control.{Menu => FXMenu, MenuBar, MenuItem}
+import scalafx.scene.control.Alert.AlertType
+import scalafx.scene.control.{Alert, ButtonType, MenuBar, MenuItem, Menu => FXMenu}
 import scalafx.scene.input.{KeyCode, KeyCodeCombination, KeyCombination}
-import scalafx.stage.{DirectoryChooser, FileChooser}
+import scalafx.stage.DirectoryChooser
 
 object Menu {
   /**
@@ -34,16 +35,42 @@ object Menu {
         text = "New From Existing Sources"
         accelerator = new KeyCodeCombination(KeyCode.N, KeyCombination.ControlDown, KeyCombination.ShiftDown)
         onAction = _ => {
-          val directoryChooser = new DirectoryChooser
-          val sources = directoryChooser.showDialog(UIApp.primaryStage)
-          val meta = Meta.find(sources)
-          meta match {
-            case Left(value) => println(value.message)
-            case Right(value) =>
-              State.meta.update(value)
-              State.sources.update(sources.toString)
-          }
           println("existing")
+
+          def openNew = {
+            val directoryChooser = new DirectoryChooser
+            val sources = directoryChooser.showDialog(UIApp.primaryStage)
+            val meta = Meta.find(sources)
+            meta match {
+              case Left(value) => println(value.message)
+              case Right(value) =>
+                State.meta.update(value)
+                State.sources.update(sources.toString)
+            }
+          }
+
+          if (State.meta.isNotNull.get) {
+            val alert = new Alert(AlertType.Confirmation) {
+              contentText = "Save current project?"
+              headerText = None
+              buttonTypes =
+                ButtonType.Yes ::
+                  ButtonType.No ::
+                  ButtonType.Cancel ::
+                  Nil
+            }
+            alert.initOwner(UIApp.primaryStage)
+            alert.showAndWait() match {
+              case Some(ButtonType.Yes) =>
+                println("save current")
+                openNew
+              case Some(ButtonType.No) =>
+                println("discard current")
+                openNew
+              case _ =>
+                println("cancel")
+            }
+          } else openNew
         }
       }
       val open = new MenuItem {
