@@ -33,9 +33,9 @@ object ProjectControls {
       decode[Config.AppConfiguration](Files.readString(Config.appConfig))
     }.flatMap(_.toOption)
     val currentRecent = currentConfig.toList.flatMap(_.recent)
-    val newRecent = reference :: currentRecent.filterNot(_ == reference).take(9)
+    val newRecent = reference :: (currentRecent.filterNot(_ == reference)).take(9)
     val configurationJson = AppConfiguration(
-      State.currentReference().orElse(currentConfig.flatMap(_.lastProject)),
+      currentConfig.flatMap(_.lastProject).orElse(Config.currentReference()),
       newRecent,
     ).asJson
     Files.writeString(Config.appConfig, configurationJson.spaces2)
