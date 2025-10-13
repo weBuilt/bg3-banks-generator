@@ -34,7 +34,7 @@ object Menu {
       }
       val open = new MenuItem {
         text = "Open"
-        accelerator = new KeyCodeCombination(KeyCode.N, KeyCombination.ControlDown, KeyCombination.ShiftDown)
+        accelerator = new KeyCodeCombination(KeyCode.O, KeyCombination.ControlDown)
         onAction = _ => {
           println("open")
           if (State.meta.isNotNull.get) {
@@ -62,7 +62,7 @@ object Menu {
         }
       }
       val save = new MenuItem {
-        text = "New"
+        text = "Save"
         accelerator = new KeyCodeCombination(KeyCode.S, KeyCombination.ControlDown)
         onAction = _ => println("save")
       }
