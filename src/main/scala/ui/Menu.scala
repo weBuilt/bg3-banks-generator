@@ -38,19 +38,11 @@ object Menu {
         onAction = _ => {
           println("open")
           if (State.meta.isNotNull.get) {
-            val alert = new Alert(AlertType.Confirmation) {
-              contentText = "Save current project?"
-              headerText = None
-              buttonTypes =
-                ButtonType.Yes ::
-                  ButtonType.No ::
-                  ButtonType.Cancel ::
-                  Nil
-            }
-            alert.initOwner(UIApp.primaryStage)
+            val alert = confirmSaveAlert
             alert.showAndWait() match {
               case Some(ButtonType.Yes) =>
                 println("save current")
+                ProjectControls.saveCurrentProject()
                 openProject()
               case Some(ButtonType.No) =>
                 println("discard current")
@@ -77,14 +69,27 @@ object Menu {
         Nil
     }
   }
+  def confirmSaveAlert: Alert = {
+    val res = new Alert(AlertType.Confirmation) {
+      contentText = "Save current project?"
+      headerText = None
+      buttonTypes =
+        ButtonType.Yes ::
+          ButtonType.No ::
+          ButtonType.Cancel ::
+          Nil
+    }
+    res.initOwner(UIApp.primaryStage)
+    res
+  }
   def openProject(): Unit = {
     val directoryChooser = new DirectoryChooser {
       initialDirectory <== State.sourcesParent
     }
     val sources = directoryChooser.showDialog(UIApp.primaryStage)
-    rememberCurrent()
+    val current = State.currentReference()
     ProjectControls.openProject(sources)
+    current.foreach(ProjectControls.addToRecent)
   }
-  def rememberCurrent(): Unit =
-    Config.currentReference().foreach(ProjectControls.addToRecent)
+
 }

@@ -3,13 +3,14 @@ package ui
 import app.Config
 import app.Config.WindowConfiguration
 import app.controls.ProjectControls
-import io.circe.generic.extras.Configuration
 import io.circe.generic.auto._
+import io.circe.generic.extras.Configuration
 import io.circe.parser.decode
 import io.circe.syntax._
 import javafx.stage.Screen
 import scalafx.application.JFXApp3
 import scalafx.scene.Scene
+import scalafx.scene.control.ButtonType
 import scalafx.stage.Stage
 
 import java.nio.file.Files
@@ -33,11 +34,24 @@ object UIApp extends JFXApp3 {
   lazy val primaryStage: JFXApp3.PrimaryStage = new JFXApp3.PrimaryStage {
     title = "Baldur's Gate 3 Bank Manager"
     scene = new Scene(MainWindow.mainWindow)
-    onCloseRequest = { _ =>
-      saveWindowState(this)
+    onCloseRequest = { event =>
+      event.consume()
+      val confirmation = Menu.confirmSaveAlert
+      confirmation.showAndWait() match {
+        case Some(ButtonType.Yes) =>
+          println("save current")
+          ProjectControls.saveCurrentProject()
+          saveWindowState(this)
+          primaryStage.close()
+        case Some(ButtonType.No) =>
+          println("discard current")
+          saveWindowState(this)
+          primaryStage.close()
+        case _ =>
+          println("cancel")
+      }
     }
   }
-
 
 
   def saveWindowState(stage: Stage): Unit = {
@@ -84,6 +98,7 @@ object UIApp extends JFXApp3 {
         idx
     }.getOrElse(0)
   }
+
   def adjustWindowPosition(
     settings: WindowConfiguration,
     screen: Screen,
@@ -110,6 +125,7 @@ object UIApp extends JFXApp3 {
 
     (x, y, adjustedWidth, adjustedHeight)
   }
+
   def initState(): Unit = {
     ProjectControls.init()
   }
