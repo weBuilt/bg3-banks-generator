@@ -33,9 +33,9 @@ object ProjectControls {
       decode[Config.AppConfiguration](Files.readString(Config.appConfig))
     }.flatMap(_.toOption)
     val currentRecent = currentConfig.toList.flatMap(_.recent)
-    val newRecent = reference :: (currentRecent.filterNot(_ == reference)).take(9)
+    val newRecent = reference :: currentRecent.filterNot(_ == reference).take(9)
     val configurationJson = AppConfiguration(
-      currentConfig.flatMap(_.lastProject).orElse(Config.currentReference()),
+      State.currentReference().orElse(currentConfig.flatMap(_.lastProject)),
       newRecent,
     ).asJson
     Files.writeString(Config.appConfig, configurationJson.spaces2)
@@ -48,4 +48,11 @@ object ProjectControls {
       .foreach { appConfig =>
         appConfig.lastProject.foreach(openProject)
       }
+
+  def saveCurrentProject(): Unit = {
+    //generate lsx
+    State.currentProjectConfig().foreach {project =>
+      Files.writeString(Config.projectConfig(project.reference), project.asJson.spaces2)
+    }
+  }
 }

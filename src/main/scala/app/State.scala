@@ -1,5 +1,6 @@
 package app
 
+import app.Config.{ProjectConfiguration, ProjectReference}
 import fileparser.lsx.Meta
 import scalafx.beans.binding.{Bindings, ObjectBinding}
 import scalafx.beans.property.{ObjectProperty, StringProperty}
@@ -15,5 +16,19 @@ object State {
     () => Paths.get(sources.value).toFile.getParentFile,
     sources
   )
+
+  def currentReference(): Option[ProjectReference] =
+    Option.when(State.meta.isNotNull.get()) {
+      ProjectReference(
+        State.meta.value.uuid,
+        State.meta.value.name,
+        State.sources.value,
+      )
+    }
+
+  def currentProjectConfig(): Option[ProjectConfiguration] =
+    currentReference().map { reference =>
+      ProjectConfiguration(reference, None, Nil)
+    }
 
 }

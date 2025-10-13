@@ -6,6 +6,7 @@ object Config {
   val configDirectory: Path = Paths.get(System.getProperty("user.home")).resolve(".wblt_bg3bg")
   val windowConfig: Path = configDirectory.resolve("window.json")
   val appConfig: Path = configDirectory.resolve("app.json")
+  def projectConfig(reference: ProjectReference): Path = configDirectory.resolve(reference.id + ".proj")
 
   case class WindowConfiguration(
     x: Double = 0d,
@@ -27,13 +28,15 @@ object Config {
     sources: String,
   )
 
-  def currentReference(): Option[ProjectReference] =
-    Option.when(State.meta.isNotNull.get()) {
-      ProjectReference(
-        State.meta.value.uuid,
-        State.meta.value.name,
-        State.sources.value,
-      )
-    }
+  case class BankReference(
+    tpe: String,
+    sources: String,
+  )
+
+  case class ProjectConfiguration(
+    reference: ProjectReference,
+    activeBank: Option[BankReference],
+    openedBanks: List[BankReference],
+  )
 
 }
