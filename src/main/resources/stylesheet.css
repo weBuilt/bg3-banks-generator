@@ -1,0 +1,61 @@
+/* Базовый стиль для валидируемых полей*/
+.validated {
+  -fx-background-color: #ffffff;
+  -fx-border-color: #cccccc;
+  -fx-border-width: 2px;
+  -fx-border-radius: 4px;
+  -fx-padding: 8px;
+  -fx-font-size: 14px;
+
+  /* Плавный переход для границы и фона */
+  -fx-transition: -fx-border-color 0.3s ease, -fx-background-color 0.3s ease;
+}
+
+/* Состояния валидации */
+
+.validated.invalid {
+  -fx-border-color: #dc3545; /* красный */
+  -fx-background-color: #f8d7da; /* светло‑красный фон */
+}
+
+.validated.warning {
+  -fx-border-color: #ffc107; /* жёлтый */
+  -fx-background-color: #fff3cd; /* светло‑жёлтый фон */
+}
+
+.validated.valid {
+  -fx-border-color: #28a745; /* зелёный */
+  -fx-background-color: #d4edda; /* светло‑зелёный фон */
+}
+
+/* Иконки статуса через псевдоэлемент (имитация ::after)
+   В JavaFX/ScalaFX нет полноценных псевдоэлементов,
+   но можно использовать -fx-graphic с иконкой или текст.
+   Здесь — текстовый символ как замена.
+*/
+.validated:after {
+  -fx-content-display: right; /* не поддерживается напрямую */
+  /* В ScalaFX лучше управлять иконкой через отдельный Label/ImageView рядом */
+}
+
+/* Альтернатива: добавляем символ статуса через -fx-prompt-text (для placeholder-подобного эффекта)
+   Но это не идеально. Лучше — отдельный узел в UI.
+*/
+
+/* Эффекты фокуса и наведения */
+.validated:focus {
+  -fx-border-color: #007bff; /* синий акцент при фокусе */
+  -fx-outline: none;
+  -fx-effect: dropshadow(three-pass-box, rgba(0, 123, 255, 0.25), 0, 0, 0, 3px);
+}
+
+.validated:hover:not(:focus) {
+  -fx-border-color: #999999;
+}
+
+.tooltip-hidden .tooltip-popup {
+  -fx-opacity: 0 !important;      /* Делает полностью прозрачным */
+  -fx-pointer-events: none;     /* Отключает взаимодействие с мышью */
+  -fx-transition: -fx-opacity 0.3s ease; /* Плавное исчезновение */
+}
+

@@ -13,7 +13,7 @@ object State {
   val meta: ObjectProperty[Meta] = new ObjectProperty[Meta]
   val sources: StringProperty = new StringProperty()
   val sourcesParent: ObjectBinding[File] = Bindings.createObjectBinding(
-    () => Paths.get(sources.value).toFile.getParentFile,
+    () => Paths.get(sources.value).getParent.toFile,
     sources
   )
 

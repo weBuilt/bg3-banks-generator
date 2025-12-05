@@ -33,22 +33,21 @@ object UIApp extends JFXApp3 {
 
   lazy val primaryStage: JFXApp3.PrimaryStage = new JFXApp3.PrimaryStage {
     title = "Baldur's Gate 3 Bank Manager"
-    scene = new Scene(MainWindow.mainWindow)
+    scene = new Scene(MainWindow.mainWindow) {
+      stylesheets add getClass.getResource("/stylesheet.css").toExternalForm
+    }
     onCloseRequest = { event =>
       event.consume()
       val confirmation = Menu.confirmSaveAlert
       confirmation.showAndWait() match {
         case Some(ButtonType.Yes) =>
-          println("save current")
           ProjectControls.saveCurrentProject()
           saveWindowState(this)
           primaryStage.close()
         case Some(ButtonType.No) =>
-          println("discard current")
           saveWindowState(this)
           primaryStage.close()
-        case _ =>
-          println("cancel")
+        case _ => {}
       }
     }
   }

@@ -3,10 +3,10 @@ package fileparser.lsx
 import cats.implicits._
 import domain.Exceptions
 import domain.Exceptions.MyException
-import util.PackedVersion
+import util.{PackedVersion, UUID}
 
 import java.io.File
-import java.nio.file.Files
+import java.nio.file.{Files, Path, Paths}
 
 case class Meta(
   author: String,
@@ -80,4 +80,52 @@ object Meta {
         case _ =>
           LSX.malformedXMLException.asLeft[Meta]
       }
+
+  def path(name: String): Path =
+    Paths.get("Mods", name, filename)
+
+  def default(name: String, author: String): String =
+    s"""<?xml version="1.0" encoding="utf-8"?>
+       |<save>
+       |    <version major="4" minor="0" revision="9" build="333" />
+       |    <region id="Config">
+       |        <node id="root">
+       |            <children>
+       |                <node id="Dependencies" />
+       |                <node id="ModuleInfo">
+       |                    <attribute id="Author" type="LSWString" value="$author" />
+       |                    <attribute id="CharacterCreationLevelName" type="FixedString" value="" />
+       |                    <attribute id="Description" type="LSWString" value="$name" />
+       |                    <attribute id="Folder" type="LSWString" value="$name" />
+       |                    <attribute id="GMTemplate" type="FixedString" value="" />
+       |                    <attribute id="LobbyLevelName" type="FixedString" value="" />
+       |                    <attribute id="MD5" type="LSString" value="" />
+       |                    <attribute id="MainMenuBackgroundVideo" type="FixedString" value="" />
+       |                    <attribute id="MenuLevelName" type="FixedString" value="" />
+       |                    <attribute id="Name" type="FixedString" value="$name" />
+       |                    <attribute id="NumPlayers" type="uint8" value="4" />
+       |                    <attribute id="PhotoBooth" type="FixedString" value="" />
+       |                    <attribute id="StartupLevelName" type="FixedString" value="" />
+       |                    <attribute id="Tags" type="LSWString" value="" />
+       |                    <attribute id="Type" type="FixedString" value="Add-on" />
+       |                    <attribute id="UUID" type="FixedString" value="${UUID.generate}" />
+       |                    <attribute id="Version64" type="int64" value="36028797018963968" />
+       |                    <children>
+       |                        <node id="PublishVersion">
+       |                            <attribute id="Version64" type="int64" value="36028797018963968" />
+       |                        </node>
+       |                        <node id="Scripts" />
+       |                        <node id="TargetModes">
+       |                            <children>
+       |                                <node id="Target">
+       |                                    <attribute id="Object" type="FixedString" value="Story" />
+       |                                </node>
+       |                            </children>
+       |                        </node>
+       |                    </children>
+       |                </node>
+       |            </children>
+       |        </node>
+       |    </region>
+       |</save>""".stripMargin
 }

@@ -2,6 +2,7 @@ package util
 
 import java.io.File
 import java.nio.file.{Path, Paths}
+import scala.util.Try
 
 object FileUtils {
   def forwardslash(str: String): String = str.replaceAll("\\\\", "/")
@@ -30,4 +31,7 @@ object FileUtils {
       filename.substring(lastDot)
     }
   }
+  def isValidAbsolutePath(path: String): Boolean = Try{
+    Paths.get(path).isAbsolute
+  }.toOption.contains(true)
 }
