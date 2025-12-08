@@ -12,6 +12,8 @@ import scalafx.application.JFXApp3
 import scalafx.scene.Scene
 import scalafx.scene.control.ButtonType
 import scalafx.stage.Stage
+import ui.menu.MainMenuBar
+import ui.menu.project.ProjectMenu
 
 import java.nio.file.Files
 
@@ -38,7 +40,7 @@ object UIApp extends JFXApp3 {
     }
     onCloseRequest = { event =>
       event.consume()
-      val confirmation = Menu.confirmSaveAlert
+      val confirmation = ProjectMenu.confirmSaveAlert
       confirmation.showAndWait() match {
         case Some(ButtonType.Yes) =>
           ProjectControls.saveCurrentProject()
