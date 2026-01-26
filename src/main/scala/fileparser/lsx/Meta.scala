@@ -1,5 +1,6 @@
 package fileparser.lsx
 
+import cats.data.Validated
 import cats.implicits._
 import domain.Exceptions
 import domain.Exceptions.MyException
@@ -18,53 +19,51 @@ case class Meta(
 )
 
 object Meta {
-  val filename = "meta.lsx"
-  val metaNotFound: MyException = Exceptions.SimpleException(s"$filename not found")
+  val metaFilename = "meta.lsx"
+  val metaNotFound: MyException = Exceptions.SimpleException(s"$metaFilename not found")
   val modsNotFound: MyException = Exceptions.SimpleException(s"Mods folder not found")
-  val tooManyMetaFiles: MyException = Exceptions.SimpleException(s"Too many $filename files found")
-  val folderMismatch: MyException = Exceptions.SimpleException(s"Folder mismatch")
+  val tooManyMetaFiles: MyException = Exceptions.SimpleException(s"Too many $metaFilename files found")
+  def folderMismatch(folderInMeta: String, actualParent: String): MyException = Exceptions.SimpleException(s"Folder mismatch. Folder specified in file is $folderInMeta while file located in $actualParent")
 
   /** look for meta.lsx in sources/Mods/_/ */
-  def find(sources: File): Either[MyException, Meta] =
-    for {
-      sources <- Either.cond(sources.exists() && sources.isDirectory, sources, Exceptions.noDir)
-      modsDir <- findModsDir(sources)
-      metaFiles <- findMetaFiles(modsDir)
-      meta <- validateAndParseMeta(metaFiles)
-    } yield meta
+  def find(sources: File, folder: Option[String]): Validated[MyException, Meta] =
+    Validated.cond(sources.isDirectory, sources, Exceptions.noDir)
+      .andThen(findModsDir)
+      .andThen(findMetaFiles(_, folder))
+      .andThen(validateAndParseMeta)
 
-  def findModsDir(sources: File): Either[MyException, File] =
+  def findModsDir(sources: File): Validated[MyException, File] =
     sources
       .listFiles()
       .find(f => f.isDirectory && f.getName == "Mods")
-      .toRight(modsNotFound)
+      .toValid(modsNotFound)
 
-  def findMetaFiles(modsDir: File): Either[MyException, List[File]] =
+  def findMetaFiles(modsDir: File, folder: Option[String]): Validated[MyException, List[File]] =
     modsDir
       .listFiles()
-      .filter(_.isDirectory)
+      .filter(f => f.isDirectory && folder.forall(f.getName.==))
       .flatMap { subdir =>
         subdir
           .listFiles()
-          .find(f => f.isFile && f.getName == filename)
+          .find(f => f.isFile && f.getName == metaFilename)
       }
       .toList
-      .asRight[MyException]
+      .valid[MyException]
 
-  def validateAndParseMeta(metaFiles: List[File]): Either[MyException, Meta] =
+  def validateAndParseMeta(metaFiles: List[File]): Validated[MyException, Meta] =
     metaFiles match {
       case file :: Nil =>
-        fromFile(file).flatMap { meta =>
-          val subdir = file.getParentFile
-          Either.cond(meta.folder == subdir.getName, meta, folderMismatch)
+        fromFile(file).andThen { meta =>
+          val subdir = file.getParentFile.getName
+          Validated.cond(meta.folder == subdir, meta, folderMismatch(meta.folder, subdir))
         }
-      case Nil => metaNotFound.asLeft[Meta]
-      case _ => tooManyMetaFiles.asLeft[Meta]
+      case Nil => metaNotFound.invalid[Meta]
+      case _ => tooManyMetaFiles.invalid[Meta]
     }
 
-  def fromFile(file: File): Either[MyException, Meta] =
+  def fromFile(file: File): Validated[MyException, Meta] =
     LSX.read(file)
-      .flatMap {
+      .andThen {
         case lsx@LSX.Save(_, Seq(LSX.Region("Config", node))) if node.name == "root" =>
           val meta = for {
             moduleInfo <- node.children.find(_.name == "ModuleInfo")
@@ -76,15 +75,19 @@ object Meta {
             versionLong <- version.value.toLongOption
             packedVersion = PackedVersion.fromInt64(versionLong)
           } yield Meta(author.value, name.value, uuid.value, folder.value, packedVersion, lsx)
-          meta.toRight[MyException](LSX.malformedXMLException)
+          meta.toValid[MyException](LSX.malformedXMLException)
         case _ =>
-          LSX.malformedXMLException.asLeft[Meta]
+          LSX.malformedXMLException.invalid[Meta]
       }
 
   def path(name: String): Path =
-    Paths.get("Mods", name, filename)
+    Paths.get("Mods", name, metaFilename)
 
-  def default(name: String, author: String): String =
+  def default(
+    name: String,
+    author: String,
+    uuid: Option[String] = None,
+  ): String =
     s"""<?xml version="1.0" encoding="utf-8"?>
        |<save>
        |    <version major="4" minor="0" revision="9" build="333" />
@@ -108,7 +111,7 @@ object Meta {
        |                    <attribute id="StartupLevelName" type="FixedString" value="" />
        |                    <attribute id="Tags" type="LSWString" value="" />
        |                    <attribute id="Type" type="FixedString" value="Add-on" />
-       |                    <attribute id="UUID" type="FixedString" value="${UUID.generate}" />
+       |                    <attribute id="UUID" type="FixedString" value="${uuid.getOrElse(UUID.generate)}" />
        |                    <attribute id="Version64" type="int64" value="36028797018963968" />
        |                    <children>
        |                        <node id="PublishVersion">

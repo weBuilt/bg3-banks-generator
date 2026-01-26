@@ -1,8 +1,8 @@
 package fileparser
 
-import lsx.BankElement.Generated
+import fileparser.lsx.BankElement.Generated
+import fileparser.lsx.{Mesh, Visual}
 import util.{FileUtils, UUID}
-import lsx.{Mesh, Visual}
 
 import java.nio.file.{Path, Paths}
 import scala.sys.process._
@@ -20,9 +20,9 @@ object GR2Parser {
     val template: Option[String] = lines.filter(_.startsWith("template")).collectFirst {
       case templateRegex(templateName) => templateName
     }
-    val name: String = FileUtils.removeExtension(path.getFileName)
+    val name: String = FileUtils.FilenameWithExtension(path.getFileName).filename
     val relativePath: Path = modSources.relativize(path)
-    val templateName: String = s"""${FileUtils.removeExtension(relativePath)}.${template.getOrElse("Dummy_Root")}.0"""
+    val templateName: String = s"""${FileUtils.FilenameWithExtension(relativePath).filename}.${template.getOrElse("Dummy_Root")}.0"""
     Either.cond(
       meshes.nonEmpty,
       Visual(

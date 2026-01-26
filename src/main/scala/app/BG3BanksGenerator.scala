@@ -1,8 +1,8 @@
 package app
 
-import fileparser.lsx.BankElement.{Existing, Generated}
 import fileparser.ConfigParser.RequiredConfig
-import fileparser.lsx.{BankElement, LSXParser, Material, Texture, TextureUsage, Visual}
+import fileparser.lsx.BankElement.{Existing, Generated}
+import fileparser.lsx._
 import fileparser.{ConfigParser, DDSParser, GR2Parser}
 import ui.UIApp
 
@@ -18,7 +18,7 @@ object BG3BanksGenerator
   if (config.ui) {
     println("launching in UI mode")
     UIApp.main(args)
-  }  else config.requiredConfig match {
+  } else config.requiredConfig match {
     case None =>
       println(ConfigParser.helpMessage)
     case Some(RequiredConfig(modname, modSources)) =>

@@ -1,11 +1,12 @@
 package app
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Path, Paths}
 
 object Config {
   val configDirectory: Path = Paths.get(System.getProperty("user.home")).resolve(".wblt_bg3bg")
   val windowConfig: Path = configDirectory.resolve("window.json")
   val appConfig: Path = configDirectory.resolve("app.json")
+
   def projectConfig(reference: ProjectReference): Path = configDirectory.resolve(reference.id + ".proj")
 
   case class WindowConfiguration(
@@ -18,13 +19,13 @@ object Config {
   )
 
   case class AppConfiguration(
-    lastProject: Option[ProjectReference],
-    recent: List[ProjectReference],
+    recentProjects: List[ProjectReference] = Nil,
   )
 
   case class ProjectReference(
     id: String,
     name: String,
+    folder: String,
     sources: String,
   )
 

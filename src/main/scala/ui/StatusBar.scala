@@ -1,11 +1,9 @@
 package ui
 
-import scalafx.beans.binding.{Bindings, StringBinding}
+import app.State
 import scalafx.scene.control.Separator
 import scalafx.scene.layout.HBox
 import scalafx.scene.text.Text
-import app.State
-import fileparser.lsx.Meta
 
 object StatusBar {
   lazy val statusBar: HBox = {
@@ -13,19 +11,19 @@ object StatusBar {
       text = "Mod:"
     }
     val modName = new Text {
-      text <== metaStringLens(_.name)
+      text <== app.State.ProjectState.name
     }
     val authorLabel = new Text {
       text = "Author:"
     }
-    val author = new Text{
-      text <== metaStringLens(_.author)
+    val author = new Text {
+      text <== app.State.ProjectState.author
     }
     val sourcesLabel = new Text {
       text = "Sources:"
     }
-    val sources = new Text{
-      text <== State.sources
+    val sources = new Text {
+      text <== State.ProjectState.sources
     }
     val hbox = new HBox {
       children =
@@ -39,12 +37,9 @@ object StatusBar {
           sources ::
           Nil
       spacing = 1.0
-      visible <== State.meta.isNotNull
+      visible <== State.ProjectState.meta.isNotNull
     }
     hbox
   }
-  def metaStringLens(f: Meta => String): StringBinding = Bindings.createStringBinding(
-    () => Option(app.State.meta.value).map(f).getOrElse(""),
-    State.meta,
-  )
+
 }

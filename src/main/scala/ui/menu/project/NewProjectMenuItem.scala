@@ -56,7 +56,7 @@ object NewProjectMenuItem {
     val chooseButton = new Button("Browse...") {
       onAction = _ => {
         val directoryChooser = new DirectoryChooser {
-          initialDirectory <== State.sourcesParent
+          initialDirectory <== State.ProjectState.sourcesParent
         }
         val sources = directoryChooser.showDialog(UIApp.primaryStage)
         sourceText.rawValue.value = if (sources != null) sources.getAbsolutePath else ""
@@ -98,7 +98,7 @@ object NewProjectMenuItem {
         result() match {
           case Validated.Valid(Some(project)) =>
             ProjectControls.initializeNewProject(project)
-            ProjectControls.openProject(project.sources)
+            ProjectControls.openProject(project.sources, Some(project.name))
           case Validated.Invalid(e) =>
             errors.text = e.mkString_("\n")
             errors.visible = true

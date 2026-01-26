@@ -2,6 +2,7 @@ package ui
 
 import app.Config
 import app.Config.WindowConfiguration
+import app.State.ProjectState
 import app.controls.ProjectControls
 import io.circe.generic.auto._
 import io.circe.generic.extras.Configuration
@@ -9,10 +10,10 @@ import io.circe.parser.decode
 import io.circe.syntax._
 import javafx.stage.Screen
 import scalafx.application.JFXApp3
+import scalafx.beans.property.StringProperty
 import scalafx.scene.Scene
 import scalafx.scene.control.ButtonType
 import scalafx.stage.Stage
-import ui.menu.MainMenuBar
 import ui.menu.project.ProjectMenu
 
 import java.nio.file.Files
@@ -34,23 +35,25 @@ object UIApp extends JFXApp3 {
   }
 
   lazy val primaryStage: JFXApp3.PrimaryStage = new JFXApp3.PrimaryStage {
-    title = "Baldur's Gate 3 Bank Manager"
+    title <== StringProperty("Baldur's Gate 3 Bank Manager ") + app.State.ProjectState.name
     scene = new Scene(MainWindow.mainWindow) {
       stylesheets add getClass.getResource("/stylesheet.css").toExternalForm
     }
     onCloseRequest = { event =>
       event.consume()
-      val confirmation = ProjectMenu.confirmSaveAlert
-      confirmation.showAndWait() match {
-        case Some(ButtonType.Yes) =>
-          ProjectControls.saveCurrentProject()
-          saveWindowState(this)
-          primaryStage.close()
-        case Some(ButtonType.No) =>
-          saveWindowState(this)
-          primaryStage.close()
-        case _ => {}
-      }
+      if (ProjectState.reference().nonEmpty) {
+        val confirmation = ProjectMenu.confirmSaveAlert
+        confirmation.showAndWait() match {
+          case Some(ButtonType.Yes) =>
+            ProjectControls.saveCurrentProject()
+            saveWindowState(this)
+            primaryStage.close()
+          case Some(ButtonType.No) =>
+            saveWindowState(this)
+            primaryStage.close()
+          case _ => {}
+        }
+      } else primaryStage.close()
     }
   }
 

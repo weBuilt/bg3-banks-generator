@@ -1,5 +1,9 @@
 package fileparser.lsx
 
+
+import cats.data.Validated.{Invalid, Valid}
+import cats.data._
+import cats.syntax.all._
 import domain.Exceptions
 import domain.Exceptions.MyException
 import util.FileUtils
@@ -7,7 +11,7 @@ import util.FileUtils
 import java.io.File
 import java.nio.file.Path
 import scala.util.{Failure, Success, Try}
-import scala.xml.{Node => XMLNode, Attribute => XMLAttribute,_}
+import scala.xml.{Attribute => XMLAttribute, Node => XMLNode, _}
 
 object LSX {
   val dotLSX: String = ".lsx"
@@ -84,8 +88,8 @@ object LSX {
       lslibMeta = nodeSeq \@ "lslibMeta",
     )
 
-    def from(elem: Elem): Either[Exceptions.MyException, Save] =
-      Either.cond(
+    def from(elem: Elem): Validated[Exceptions.MyException, Save] =
+      Validated.cond(
         elem.label == "save",
         Save(
           version(elem \ "version"),
@@ -117,18 +121,18 @@ object LSX {
         }
   }
 
-  def read(path: File): Either[Exceptions.MyException, Save] = {
+  def read(path: File): Validated[Exceptions.MyException, Save] = {
     val exists = path.exists()
-    val isLSX = FileUtils.extension(path).contains(dotLSX)
-    if (!exists) Left(Exceptions.noFile)
-    else if (!isLSX) Left(notLSXException)
+    val isLSX = FileUtils.FilenameWithExtension(path).extension == dotLSX
+    if (!exists) Exceptions.noFile.invalid[Save]
+    else if (!isLSX) notLSXException.invalid[Save]
     else {
       Try {
         val elem = scala.xml.XML.loadFile(path)
         Save.from(elem)
       } match {
         case Failure(exception) =>
-          Left(Exceptions.SimpleException(exception.getMessage))
+          Exceptions.SimpleException(exception.getMessage).invalid[Save]
         case Success(value) => value
       }
     }

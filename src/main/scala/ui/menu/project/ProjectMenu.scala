@@ -31,7 +31,7 @@ object ProjectMenu {
     }
 
   def saveOrDiscard(next: () => Unit): Unit =
-    if (State.meta.isNotNull.get) {
+    if (State.ProjectState.meta.isNotNull.get) {
       val alert = confirmSaveAlert
       alert.showAndWait() match {
         case Some(ButtonType.Yes) =>

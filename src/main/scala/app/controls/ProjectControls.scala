@@ -5,12 +5,13 @@ import app.controls.DefaultFiles.DefaultStructure
 import app.{Config, State}
 import cats.data._
 import cats.syntax.all._
-import domain.Exceptions.MyException
+import domain.Exceptions._
 import fileparser.lsx.Meta
 import io.circe.generic.auto._
 import io.circe.generic.extras.Configuration
 import io.circe.parser.decode
 import io.circe.syntax._
+import util.FileUtils
 
 import java.io.File
 import java.nio.file.{Files, Paths}
@@ -19,48 +20,94 @@ import scala.util.{Failure, Success, Try}
 
 object ProjectControls {
 
-  implicit val customConfig: Configuration = Configuration.default.withDefaults
+  implicit val jsonDefaultsOn: Configuration = Configuration.default.withDefaults
 
-  def openProject(reference: ProjectReference): Unit =
-    openProject(Paths.get(reference.sources).toFile)
+  def openProject(reference: ProjectReference): MyValidated[Unit] =
+    FileUtils.validatedPath(reference.sources)
+      .andThen { path => openProject(path.toFile, Some(reference.folder)) }
 
-  def openProject(sources: File): Unit = {
-    val meta = Meta.find(sources)
-    meta match {
-      case Left(value) => println(value.message)
-      case Right(value) =>
-        State.meta.update(value)
-        State.sources.update(sources.toString)
-    }
-  }
-
-  def addToRecent(reference: ProjectReference): Unit = {
-    val currentConfig = Option.when(Files.exists(Config.appConfig)) {
-      decode[Config.AppConfiguration](Files.readString(Config.appConfig))
-    }.flatMap(_.toOption)
-    val currentRecent = currentConfig.toList.flatMap(_.recent)
-    val newRecent = reference :: currentRecent.filterNot(_ == reference).take(9)
-    val configurationJson = AppConfiguration(
-      State.currentReference().orElse(currentConfig.flatMap(_.lastProject)),
-      newRecent,
-    ).asJson
-    Files.writeString(Config.appConfig, configurationJson.spaces2)
-  }
-
-  def init(): Unit =
-    Option.when(Files.exists(appConfig)) {
-        decode[AppConfiguration](Files.readString(appConfig))
-      }.flatMap(_.toOption)
-      .foreach { appConfig =>
-        appConfig.lastProject.foreach(openProject)
+  def openProject(sources: File, folder: Option[String]): MyValidated[Unit] =
+    Meta.find(sources, folder)
+      .map { meta =>
+        State.ProjectState.meta.update(meta)
+        State.ProjectState.sources.update(sources.toString)
       }
 
-  def saveCurrentProject(): Unit = {
-    //serialization
-    State.currentReference().foreach(addToRecent)
-    State.currentProjectConfig().foreach { project =>
-      Files.writeString(Config.projectConfig(project.reference), project.asJson.spaces2)
-    }
+
+  /** empty config is first run, corrupted config is something went wrong */
+  def readAppConfiguration: MyValidated[AppConfiguration] =
+    if (Files.notExists(Config.appConfig)) AppConfiguration().valid[MyException]
+    else decode[Config.AppConfiguration](Files.readString(Config.appConfig))
+      .toValidated.myException
+
+  def saveAppConfiguration(
+    appConfiguration: Option[AppConfiguration] = None,
+  ): MyValidated[Unit] = Try {
+    Files.writeString(Config.appConfig, appConfiguration.getOrElse(State.AppState.config()).asJson.spaces2)
+  }.toValidated.void.myException
+
+  def saveCurrentProjectConfiguration(
+    projectConfiguration: Option[ProjectConfiguration] = None,
+  ): MyValidated[Unit] = Try {
+    projectConfiguration
+      .orElse(State.ProjectState.config())
+      .foreach { project =>
+        Files.writeString(Config.projectConfig(project.reference), project.asJson.spaces2)
+      }
+  }.toValidated.myException
+
+  /** check on startup and every project save
+   * read from file every time in case of multiple instances running */
+  def readRecentProjects(
+    appConfiguration: Option[AppConfiguration] = None,
+  ): MyValidated[List[ProjectReference]] =
+    appConfiguration.map(_.valid[MyException])
+      .getOrElse(readAppConfiguration)
+      .map { appConfig =>
+        appConfig.recentProjects
+          .filter { reference =>
+            FileUtils.pathOpt(reference.sources)
+              .filter(Files.exists(_))
+              .exists { sources =>
+                Files.exists(sources.resolve(Meta.path(reference.folder)))
+              }
+          }
+      }
+
+  def addToRecentProjects(reference: ProjectReference): MyValidated[Unit] = {
+    val recentProjects = readRecentProjects().getOrElse(Nil)
+    val updatedRecentProjects = reference :: recentProjects.filterNot(_.sources == reference.sources).take(9)
+    println("addToRecentProjects", State.AppState.recentProjects.toList)
+    State.AppState.recentProjects.clear()
+    State.AppState.recentProjects.addAll(updatedRecentProjects)
+    println("addToRecentProjects2", State.AppState.recentProjects.toList)
+    saveAppConfiguration()
+  }
+
+  //open on startup setting
+  //don't automatically open any project if already opened in other instance
+  //some default view with open project menu
+  def init(): MyValidatedNec[Unit] =
+    readAppConfiguration.toValidatedNec
+      .andThen { appConfiguration: AppConfiguration =>
+        println("init", State.AppState.recentProjects.toList)
+        State.AppState.recentProjects.clear()
+        State.AppState.recentProjects.addAll(appConfiguration.recentProjects)
+        println("init2", State.AppState.recentProjects.toList)
+        appConfiguration.recentProjects.headOption match {
+          case Some(value) => openProject(value).toValidatedNec
+          case None => ().validNec[MyException]
+        }
+      }
+
+  def saveCurrentProject(): MyValidatedNec[Unit] = {
+    //todo serialization
+    val serialization = ().valid[MyException]
+    val actions: List[MyValidated[Unit]] =
+      serialization ::
+        saveCurrentProjectConfiguration() ::
+        State.ProjectState.reference().map(addToRecentProjects).toList
+    actions.map(_.toValidatedNec).sequenceVoid
   }
 
   case class ValidatedNewProject(name: String, author: String, sources: File)

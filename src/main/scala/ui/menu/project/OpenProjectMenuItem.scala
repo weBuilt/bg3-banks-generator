@@ -16,9 +16,9 @@ object OpenProjectMenuItem {
 
   def openProject(): Unit = {
     val directoryChooser = new DirectoryChooser {
-      initialDirectory <== State.sourcesParent
+      initialDirectory <== State.ProjectState.sourcesParent
     }
     val sources = directoryChooser.showDialog(UIApp.primaryStage)
-    Option(sources).foreach(ProjectControls.openProject)
+    Option(sources).foreach(ProjectControls.openProject(_, None))
   }
 }
