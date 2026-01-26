@@ -28,9 +28,10 @@ object ProjectControls {
 
   def openProject(sources: File, folder: Option[String]): MyValidated[Unit] =
     Meta.find(sources, folder)
-      .map { meta =>
+      .andThen { meta =>
         State.ProjectState.meta.update(meta)
         State.ProjectState.sources.update(sources.toString)
+        State.ProjectState.reference().map(addToRecentProjects).getOrElse(().valid[MyException])
       }
 
 
@@ -102,7 +103,7 @@ object ProjectControls {
     val actions: List[MyValidated[Unit]] =
       serialization ::
         saveCurrentProjectConfiguration() ::
-        State.ProjectState.reference().map(addToRecentProjects).toList
+        Nil
     actions.map(_.toValidatedNec).sequenceVoid
   }
 
