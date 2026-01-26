@@ -77,10 +77,8 @@ object ProjectControls {
   def addToRecentProjects(reference: ProjectReference): MyValidated[Unit] = {
     val recentProjects = readRecentProjects().getOrElse(Nil)
     val updatedRecentProjects = reference :: recentProjects.filterNot(_.sources == reference.sources).take(9)
-    println("addToRecentProjects", State.AppState.recentProjects.toList)
     State.AppState.recentProjects.clear()
     State.AppState.recentProjects.addAll(updatedRecentProjects)
-    println("addToRecentProjects2", State.AppState.recentProjects.toList)
     saveAppConfiguration()
   }
 
@@ -90,10 +88,8 @@ object ProjectControls {
   def init(): MyValidatedNec[Unit] =
     readAppConfiguration.toValidatedNec
       .andThen { appConfiguration: AppConfiguration =>
-        println("init", State.AppState.recentProjects.toList)
         State.AppState.recentProjects.clear()
         State.AppState.recentProjects.addAll(appConfiguration.recentProjects)
-        println("init2", State.AppState.recentProjects.toList)
         appConfiguration.recentProjects.headOption match {
           case Some(value) => openProject(value).toValidatedNec
           case None => ().validNec[MyException]
