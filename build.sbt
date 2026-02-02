@@ -37,3 +37,5 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-parser"
 ).map(_ % circeVersion)
 libraryDependencies += "io.circe" % "circe-generic-extras_2.13" % "0.14.5-RC1"
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
